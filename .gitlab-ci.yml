@@ -1,0 +1,24 @@
+stages:
+  - lint
+  - test
+
+lint:
+    stage: lint
+    image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
+    script:
+      - golangci-lint run --print-issued-lines=false --out-format code-climate:gl-code-quality-report.json,line-number
+
+gotest:
+    stage: test
+    image: golang:latest
+    services:
+        - name: postgres
+    variables:
+        POSTGRES_DB: shortener_db
+        POSTGRES_USER: master
+        POSTGRES_PASSWORD: password
+        POSTGRES_HOST: 172.17.0.2
+        POSTGRES_PORT: 5432
+        DB_PATH: postgres
+    script:
+        - go test ./pkg/handler
